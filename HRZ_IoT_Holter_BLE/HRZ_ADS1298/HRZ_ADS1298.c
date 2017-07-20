@@ -248,7 +248,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_status_handles, hrz_status, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OKS\r\n");
+      NRF_LOG_INFO("BFS\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -258,7 +258,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_1_handles, hrz_channel1, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK1\r\n");
+      NRF_LOG_INFO("BF1\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -268,7 +268,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_2_handles, hrz_channel2, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK2\r\n");
+      NRF_LOG_INFO("BF2\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -278,7 +278,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_3_handles, hrz_channel3, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK3\r\n");
+      NRF_LOG_INFO("BF3\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -288,7 +288,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_4_handles, hrz_channel4, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK4\r\n");
+      NRF_LOG_INFO("BF4\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -298,7 +298,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_5_handles, hrz_channel5, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK5\r\n");
+      NRF_LOG_INFO("BF5\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -308,7 +308,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_6_handles, hrz_channel6, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK6\r\n");
+      NRF_LOG_INFO("BF6\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -318,7 +318,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_7_handles, hrz_channel7, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK7\r\n");
+      NRF_LOG_INFO("BF7\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }
@@ -328,7 +328,7 @@ void hrz_send_ecg_channels()
       buffer_is_free = false;
       while (buffer_is_free == false);
       err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_8_handles, hrz_channel8, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("OK8\r\n");
+      NRF_LOG_INFO("BF8\r\n");
     }else{
       SEND_ERROR_CHECK(err_code);
     }

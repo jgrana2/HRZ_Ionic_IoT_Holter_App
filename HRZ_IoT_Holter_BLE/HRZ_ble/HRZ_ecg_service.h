@@ -26,7 +26,7 @@ extern "C" {
 #define BLE_UUID_ECG_CHANNEL_7              0x8177  /**< ECG Channel 7 characteristic UUID */
 #define BLE_UUID_ECG_CHANNEL_8              0x8178  /**< ECG Channel 8 characteristic UUID */
 #define HRZ_CHANNEL_LEN                     3       /**< Size of channel value in bytes */
-#define HRZ_SAMPLES_PER_PACKET              6
+#define HRZ_SAMPLES_PER_PACKET              28
 #define HRZ_ECGS_MAX_BUFFER_SIZE            (HRZ_CHANNEL_LEN * HRZ_SAMPLES_PER_PACKET)      /**< Size of ECG samples buffer in bytes inside service. */
 
 

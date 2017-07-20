@@ -506,6 +506,21 @@ void ble_stack_init(void)
     err_code = sd_ble_cfg_set(BLE_CONN_CFG_GATTS, &ble_cfg, ram_start);
     APP_ERROR_CHECK(err_code);
 
+    // Configure the maximum MTU.
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                 = CONN_CFG_TAG;
+    ble_cfg.conn_cfg.params.gatt_conn_cfg.att_mtu = NRF_BLE_GATT_MAX_MTU_SIZE;
+    err_code = sd_ble_cfg_set(BLE_CONN_CFG_GATT, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
+
+    // Configure the maximum event length.
+    memset(&ble_cfg, 0x00, sizeof(ble_cfg));
+    ble_cfg.conn_cfg.conn_cfg_tag                     = CONN_CFG_TAG;
+    ble_cfg.conn_cfg.params.gap_conn_cfg.event_length = 320;
+    ble_cfg.conn_cfg.params.gap_conn_cfg.conn_count   = BLE_GAP_CONN_COUNT_DEFAULT;
+    err_code = sd_ble_cfg_set(BLE_CONN_CFG_GAP, &ble_cfg, ram_start);
+    APP_ERROR_CHECK(err_code);
+
     // Enable BLE stack.
     err_code = softdevice_enable(&ram_start);
     APP_ERROR_CHECK(err_code);

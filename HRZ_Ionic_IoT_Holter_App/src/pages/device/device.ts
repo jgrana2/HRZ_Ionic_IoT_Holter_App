@@ -54,13 +54,13 @@ export class DevicePage{
 
       //Start reading data
       this.readChannel1();
-      // this.readChannel2();
-      // this.readChannel3();
-      // this.readChannel4();
-      // this.readChannel5();
-      // this.readChannel6();
-      // this.readChannel7();
-      // this.readChannel8();
+      this.readChannel2();
+      this.readChannel3();
+      this.readChannel4();
+      this.readChannel5();
+      this.readChannel6();
+      this.readChannel7();
+      this.readChannel8();
     }
 
     createTimeline(){
