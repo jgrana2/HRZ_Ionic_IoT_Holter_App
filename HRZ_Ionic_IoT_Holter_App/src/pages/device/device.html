@@ -1,0 +1,70 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Device
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+    <button ion-item (click) = "readStatus()">
+      <p>Status</p>
+      <p>{{status}}</p>
+    </button>
+    <button ion-item (click) = "readChannel1()">
+      <p>Channel 1</p>
+      <!-- <p>{{channel1}}</p> -->
+      <canvas id="chart1" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel2()">
+      <p>Channel 2</p>
+      <!-- <p>{{channel2}}</p> -->
+      <canvas id="chart2" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel3()">
+      <p>Channel 3</p>
+      <!-- <p>{{channel3}}</p> -->
+      <canvas id="chart3" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel4()">
+      <p>Channel 4</p>
+      <!-- <p>{{channel4}}</p> -->
+      <canvas id="chart4" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel5()">
+      <p>Channel 5</p>
+      <!-- <p>{{channel5}}</p> -->
+      <canvas id="chart5" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel6()">
+      <p>Channel 6</p>
+      <!-- <p>{{channel6}}</p> -->
+      <canvas id="chart6" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel7()">
+      <p>Channel 7</p>
+      <!-- <p>{{channel7}}</p> -->
+      <canvas id="chart7" width="400" height="100"></canvas>
+    </button>
+    <button ion-item (click) = "readChannel8()">
+      <p>Channel 8</p>
+      <!-- <p>{{channel8}}</p> -->
+      <canvas id="chart8" width="400" height="100"></canvas>
+    </button>
+  </ion-list>
+</ion-content>
+
+<!-- <ion-content padding>
+  <h1>Service list</h1>
+  <ion-list>
+    <ion-item-sliding *ngFor='let characteristic of characteristics'>
+      <button ion-item (click)='connectToCharacteristic(device.id, characteristic)'>
+        <p>{{characteristic.service}}</p>
+        <p>{{characteristic.characteristic}}</p>
+        <p>{{characteristic.properties}}</p>
+        <p>{{characteristic.isNotifying}}</p>
+      </button>
+    </ion-item-sliding>
+  </ion-list>
+</ion-content> -->

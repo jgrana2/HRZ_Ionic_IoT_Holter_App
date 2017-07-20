@@ -1,0 +1,18 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Device list</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+  <button ion-button color="light" full (click) = 'startScanning()'>Scan</button>
+  <ion-list>
+    <ion-item-sliding *ngFor='let device of devices'>
+      <button ion-item (click)='connectToDevice(device)'>
+        <h2>{{device.name}}</h2>
+        <p>{{device.id}}</p>
+        <p>{{device.rssi}}</p>
+      </button>
+    </ion-item-sliding>
+  </ion-list>
+</ion-content>
