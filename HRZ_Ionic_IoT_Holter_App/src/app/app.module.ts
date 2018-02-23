@@ -10,6 +10,10 @@ import { DevicePage } from '../pages/device/device';
 
 import { BLE } from '@ionic-native/ble';
 
+import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';
+
+const config: SocketIoConfig = { url: 'http://23.106.141.171:3000', options: {} };
+
 @NgModule({
   declarations: [
     MyApp,
@@ -18,7 +22,8 @@ import { BLE } from '@ionic-native/ble';
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    SocketIoModule.forRoot(config)
   ],
   bootstrap: [IonicApp],
   entryComponents: [

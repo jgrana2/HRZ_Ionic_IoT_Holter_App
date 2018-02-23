@@ -3,6 +3,7 @@ import { NavController } from 'ionic-angular';
 import { NavParams } from 'ionic-angular';
 import { BLE } from '@ionic-native/ble';
 import SmoothieChart from 'smoothie';
+import { Socket } from 'ng-socket-io';
 
 let channel1TimeSeries = new SmoothieChart.TimeSeries();
 let channel2TimeSeries = new SmoothieChart.TimeSeries();
@@ -34,7 +35,7 @@ export class DevicePage{
   channel8: string;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private ble: BLE,
-    private chRef: ChangeDetectorRef){
+    private chRef: ChangeDetectorRef, private socket: Socket){
       this.device = this.navParams.get('device');
       this.characteristics = this.navParams.get('characteristics');
     }
