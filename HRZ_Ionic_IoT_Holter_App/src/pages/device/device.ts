@@ -62,6 +62,7 @@ export class DevicePage{
       this.readChannel6();
       this.readChannel7();
       this.readChannel8();
+
     }
 
     createTimeline(){
@@ -117,6 +118,7 @@ export class DevicePage{
           time1 += samplePeriod;
           channel1TimeSeries.append(time1, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel1", this.channel1);
         this.chRef.detectChanges();
       },
       err => {
@@ -131,6 +133,7 @@ export class DevicePage{
           time2 += samplePeriod;
           channel2TimeSeries.append(time2, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel2", this.channel2);
         this.chRef.detectChanges();
       },
       err => {
@@ -145,6 +148,7 @@ export class DevicePage{
           time3 += samplePeriod;
           channel3TimeSeries.append(time3, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel3", this.channel3);
         this.chRef.detectChanges();
       },
       err => {
@@ -159,6 +163,7 @@ export class DevicePage{
           time4 += samplePeriod;
           channel4TimeSeries.append(time4, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel4", this.channel4);
         this.chRef.detectChanges();
       },
       err => {
@@ -173,6 +178,7 @@ export class DevicePage{
           time5 += samplePeriod;
           channel5TimeSeries.append(time5, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel5", this.channel5);
         this.chRef.detectChanges();
       },
       err => {
@@ -187,6 +193,7 @@ export class DevicePage{
           time6 += samplePeriod;
           channel6TimeSeries.append(time6, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel6", this.channel6);
         this.chRef.detectChanges();
       },
       err => {
@@ -201,6 +208,7 @@ export class DevicePage{
           time7 += samplePeriod;
           channel7TimeSeries.append(time7, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel7", this.channel7);
         this.chRef.detectChanges();
       },
       err => {
@@ -215,6 +223,7 @@ export class DevicePage{
           time8 += samplePeriod;
           channel8TimeSeries.append(time8, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
+        this.socket.emit("channel8", this.channel8);
         this.chRef.detectChanges();
       },
       err => {
