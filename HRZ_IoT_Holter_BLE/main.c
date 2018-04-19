@@ -52,8 +52,21 @@ int main(void)
     {
         if (NRF_LOG_PROCESS() == false)
         {
+            //Receive data from ADS1298
             if (ads1298_data_ready) {
+              ads1298_data_ready = false;
               hrz_get_ads1298_data();
+
+              //Send data over BLE when packet is filled
+              if (ble_packet_ready) {
+                #if FIR_FILTER_ENABLED
+                  hrz_filter_data();
+                  hrz_send_filtered_data_over_BLE();
+                #else
+                  hrz_send_data_over_BLE();
+                #endif
+              }
+
             }
             power_manage();
         }
