@@ -35,9 +35,12 @@ SRC_FILES += \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_nfc.c \
+	$(SDK_ROOT)/components/libraries/uart/app_uart.c \
+	$(SDK_ROOT)/components/libraries/uart/retarget.c \
 	$(PROJ_DIR)/HRZ_ble/HRZ_ble.c \
 	$(PROJ_DIR)/HRZ_ble/HRZ_ecg_service.c \
 	$(PROJ_DIR)/HRZ_ADS1298/HRZ_ADS1298.c \
+	$(PROJ_DIR)/HRZ_ADS1298/HRZ_ADS1298_LP_Filter.c \
   $(PROJ_DIR)/main.c \
   $(SDK_ROOT)/external/segger_rtt/RTT_Syscalls_GCC.c \
   $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
@@ -174,7 +177,7 @@ INC_FOLDERS += \
 	$(PROJ_DIR)/HRZ_ADS1298 \
 
 # Libraries common to all targets
-LIB_FILES += \
+LIB_FILES += $(SDK_ROOT)/components/toolchain/cmsis/dsp/GCC/libarm_cortexM4lf_math.a \
 
 # C flags common to all targets
 CFLAGS += -DBLE_STACK_SUPPORT_REQD
@@ -200,6 +203,7 @@ CFLAGS += -DSWI_DISABLE0
 CFLAGS += -mcpu=cortex-m4
 CFLAGS += -mthumb -mabi=aapcs
 CFLAGS += -DDEBUG
+CFLAGS += -DARM_MATH_CM4
 # CFLAGS +=  -Wall -Werror -O3 -g3
 CFLAGS +=  -Wall -Werror -Og -g3
 CFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16

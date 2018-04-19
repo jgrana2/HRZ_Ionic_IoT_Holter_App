@@ -9,7 +9,6 @@ monitor reset
 
 # Add breakpoint
 break app_error_save_and_stop
-break 92
 
 # Continue
 c

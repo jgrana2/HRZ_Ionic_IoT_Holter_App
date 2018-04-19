@@ -1,10 +1,11 @@
 /* Copyright (c) 2017 Horizon Medical SAS, Cartagena - Colombia.
- * All Rights Reserved.
- */
+* All Rights Reserved.
+*/
 
 #include "HRZ_ADS1298.h"
 #include "HRZ_ecg_service.h"
 #include "HRZ_ble.h"
+#include "HRZ_ADS1298_LP_Filter.h"
 
 #define NRF_LOG_MODULE_NAME "ADS1298"
 #include "nrf_log.h"
@@ -16,11 +17,32 @@ static uint8_t spi_rx_buffer[ADS1298_SPI_BUFFER_SIZE];
 bool ads1298_data_ready = false;
 bool ads1298_data_received = false;
 bool ads1298_config_mode_enabled = true;
+bool ble_packet_ready = false;
 hrz_ads1298_data_t *ads1298_data;
 
+// ECG Channels buffers
+static q31_t hrz_channel1[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel2[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel3[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel4[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel5[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel6[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel7[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_channel8[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel1[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel2[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel3[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel4[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel5[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel6[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel7[HRZ_SAMPLES_PER_PACKET];
+static q31_t hrz_filtered_channel8[HRZ_SAMPLES_PER_PACKET];
+
+
 /**@brief ADS1298 SPI Module init
- */
-void hrz_ads1298_spi_init(void){
+*/
+void hrz_ads1298_spi_init(void)
+{
   nrf_drv_spi_config_t ads1298_spi_config = NRF_DRV_SPI_DEFAULT_CONFIG;
   // ads1298_spi_config.ss_pin   = ADS1298_SPI_SS_PIN;
   ads1298_spi_config.miso_pin = ADS1298_SPI_MISO_PIN;
@@ -174,176 +196,102 @@ void hrz_ads1298_spi_txrx(uint8_t * tx_buf, uint8_t tx_len, uint8_t rx_len)
 }
 
 /**
- * @brief Function for receiving and processing data from ADS1298
- */
-void hrz_get_ads1298_data(){
+* @brief Function for receiving and processing data from ADS1298
+*/
+void hrz_get_ads1298_data()
+{
+  static size_t sample_count = 0;
   hrz_ads1298_spi_txrx(spi_tx_buffer, 0, ADS1298_SPI_BUFFER_SIZE);
+
+  //Wait to receive one sample from all channels
   while (!ads1298_data_received);
-  hrz_send_ecg_channels();
-  ads1298_data_ready = false;
+
+  //Save each channel in its own buffer;
+  hrz_channel1[sample_count] = ads1298_data->channel1 & 0xFFFFFF;
+  hrz_channel2[sample_count] = ads1298_data->channel2 & 0xFFFFFF;
+  hrz_channel3[sample_count] = ads1298_data->channel3 & 0xFFFFFF;
+  hrz_channel4[sample_count] = ads1298_data->channel4 & 0xFFFFFF;
+  hrz_channel5[sample_count] = ads1298_data->channel5 & 0xFFFFFF;
+  hrz_channel6[sample_count] = ads1298_data->channel6 & 0xFFFFFF;
+  hrz_channel7[sample_count] = ads1298_data->channel7 & 0xFFFFFF;
+  hrz_channel8[sample_count] = ads1298_data->channel8 & 0xFFFFFF;
+
+  sample_count++;
+
+  //Reset sample count when reaching buffer size
+  if(sample_count >= HRZ_SAMPLES_PER_PACKET)
+  {
+    sample_count = 0;
+    ble_packet_ready = true;
+  }
 }
 
 /**
- * @brief Function for sending all characteristics notifications
- */
-void hrz_send_ecg_channels()
+* @brief Function to filter all channels
+*/
+arm_status hrz_filter_data()
+{
+  arm_status error_code;
+  error_code = hrz_ads1298_filter_data(hrz_channel1, hrz_filtered_channel1);
+  error_code = hrz_ads1298_filter_data(hrz_channel2, hrz_filtered_channel2);
+  error_code = hrz_ads1298_filter_data(hrz_channel3, hrz_filtered_channel3);
+  error_code = hrz_ads1298_filter_data(hrz_channel4, hrz_filtered_channel4);
+  error_code = hrz_ads1298_filter_data(hrz_channel5, hrz_filtered_channel5);
+  error_code = hrz_ads1298_filter_data(hrz_channel6, hrz_filtered_channel6);
+  error_code = hrz_ads1298_filter_data(hrz_channel7, hrz_filtered_channel7);
+  error_code = hrz_ads1298_filter_data(hrz_channel8, hrz_filtered_channel8);
+  return error_code;
+}
+
+/**
+* @brief Function to send all channels over BLE
+*/
+void hrz_send_data_over_BLE()
+{
+
+  //Send samples over BLE
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_1_handles, (uint8_t *)hrz_channel1);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_2_handles, (uint8_t *)hrz_channel2);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_3_handles, (uint8_t *)hrz_channel3);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_4_handles, (uint8_t *)hrz_channel4);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_5_handles, (uint8_t *)hrz_channel5);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_6_handles, (uint8_t *)hrz_channel6);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_7_handles, (uint8_t *)hrz_channel7);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_8_handles, (uint8_t *)hrz_channel8);
+  ble_packet_ready = false;
+}
+
+/**
+* @brief Function to send all filtered channels over BLE
+*/
+void hrz_send_filtered_data_over_BLE()
+{
+  //Send samples over BLE
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_1_handles, (uint8_t *)hrz_filtered_channel1);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_2_handles, (uint8_t *)hrz_filtered_channel2);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_3_handles, (uint8_t *)hrz_filtered_channel3);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_4_handles, (uint8_t *)hrz_filtered_channel4);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_5_handles, (uint8_t *)hrz_filtered_channel5);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_6_handles, (uint8_t *)hrz_filtered_channel6);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_7_handles, (uint8_t *)hrz_filtered_channel7);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_8_handles, (uint8_t *)hrz_filtered_channel8);
+  ble_packet_ready = false;
+}
+
+/**
+* @brief Function to one channel data over BLE
+*/
+void hrz_send_ecg_channel(ble_gatts_char_handles_t handle, uint8_t * data)
 {
   ret_code_t err_code;
-  static uint8_t hrz_status[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel1[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel2[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel3[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel4[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel5[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel6[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel7[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static uint8_t hrz_channel8[HRZ_ECGS_MAX_BUFFER_SIZE];
-  static size_t sample_cnt = 0;
 
-  //Save each channel in its own byte array
-  hrz_status[sample_cnt] = ads1298_data->status & 0xFF;
-  hrz_status[sample_cnt + 1] = (ads1298_data->status >> 8) & 0xFF;
-  hrz_status[sample_cnt + 2] = (ads1298_data->status >> 16) & 0xFF;
-
-  hrz_channel1[sample_cnt] = ads1298_data->channel1 & 0xFF;
-  hrz_channel1[sample_cnt + 1] = (ads1298_data->channel1 >> 8) & 0xFF;
-  hrz_channel1[sample_cnt + 2] = (ads1298_data->channel1 >> 16) & 0xFF;
-
-  hrz_channel2[sample_cnt] = ads1298_data->channel2 & 0xFF;
-  hrz_channel2[sample_cnt + 1] = (ads1298_data->channel2 >> 8) & 0xFF;
-  hrz_channel2[sample_cnt + 2] = (ads1298_data->channel2 >> 16) & 0xFF;
-
-  hrz_channel3[sample_cnt] = ads1298_data->channel3 & 0xFF;
-  hrz_channel3[sample_cnt + 1] = (ads1298_data->channel3 >> 8) & 0xFF;
-  hrz_channel3[sample_cnt + 2] = (ads1298_data->channel3 >> 16) & 0xFF;
-
-  hrz_channel4[sample_cnt] = ads1298_data->channel4 & 0xFF;
-  hrz_channel4[sample_cnt + 1] = (ads1298_data->channel4 >> 8) & 0xFF;
-  hrz_channel4[sample_cnt + 2] = (ads1298_data->channel4 >> 16) & 0xFF;
-
-  hrz_channel5[sample_cnt] = ads1298_data->channel5 & 0xFF;
-  hrz_channel5[sample_cnt + 1] = (ads1298_data->channel5 >> 8) & 0xFF;
-  hrz_channel5[sample_cnt + 2] = (ads1298_data->channel5 >> 16) & 0xFF;
-
-  hrz_channel6[sample_cnt] = ads1298_data->channel6 & 0xFF;
-  hrz_channel6[sample_cnt + 1] = (ads1298_data->channel6 >> 8) & 0xFF;
-  hrz_channel6[sample_cnt + 2] = (ads1298_data->channel6 >> 16) & 0xFF;
-
-  hrz_channel7[sample_cnt] = ads1298_data->channel7 & 0xFF;
-  hrz_channel7[sample_cnt + 1] = (ads1298_data->channel7 >> 8) & 0xFF;
-  hrz_channel7[sample_cnt + 2] = (ads1298_data->channel7 >> 16) & 0xFF;
-
-  hrz_channel8[sample_cnt] = ads1298_data->channel8 & 0xFF;
-  hrz_channel8[sample_cnt + 1] = (ads1298_data->channel8 >> 8) & 0xFF;
-  hrz_channel8[sample_cnt + 2] = (ads1298_data->channel8 >> 16) & 0xFF;
-
-  sample_cnt += HRZ_CHANNEL_LEN;
-
-  //If channel buffer is filled, send notifications
-  if (sample_cnt >= HRZ_ECGS_MAX_BUFFER_SIZE) {
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_status_handles, hrz_status, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      //Wait until buffer is free and send again
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_status_handles, hrz_status, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BFS\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_1_handles, hrz_channel1, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_1_handles, hrz_channel1, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF1\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_2_handles, hrz_channel2, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_2_handles, hrz_channel2, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF2\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_3_handles, hrz_channel3, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_3_handles, hrz_channel3, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF3\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_4_handles, hrz_channel4, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_4_handles, hrz_channel4, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF4\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_5_handles, hrz_channel5, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_5_handles, hrz_channel5, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF5\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_6_handles, hrz_channel6, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_6_handles, hrz_channel6, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF6\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_7_handles, hrz_channel7, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_7_handles, hrz_channel7, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF7\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_8_handles, hrz_channel8, HRZ_ECGS_MAX_BUFFER_SIZE);
-    if (err_code == NRF_ERROR_RESOURCES) {
-      buffer_is_free = false;
-      while (buffer_is_free == false);
-      err_code = hrz_ecg_send(&m_ecgs, m_ecgs.ecg_channel_8_handles, hrz_channel8, HRZ_ECGS_MAX_BUFFER_SIZE);
-      NRF_LOG_INFO("BF8\r\n");
-    }else{
-      SEND_ERROR_CHECK(err_code);
-    }
-
-    //Reset channel arrays just to make sure
-    memset(hrz_channel1, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel2, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel3, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel4, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel5, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel6, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel7, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-    memset(hrz_channel8, 0, HRZ_ECGS_MAX_BUFFER_SIZE);
-
-    //Fill channel arrays again
-    sample_cnt = 0;
+  err_code = hrz_ecg_send(&m_ecgs, handle, data, HRZ_ECGS_MAX_BUFFER_SIZE);
+  if (err_code == NRF_ERROR_RESOURCES) {
+    buffer_is_free = false;
+    while (buffer_is_free == false);
+    err_code = hrz_ecg_send(&m_ecgs, handle, data, HRZ_ECGS_MAX_BUFFER_SIZE);
+    NRF_LOG_WARNING("BLE buffer full, handle value: %d\r\n", handle.value_handle);
+  }else{
+    SEND_ERROR_CHECK(err_code);
   }
 }

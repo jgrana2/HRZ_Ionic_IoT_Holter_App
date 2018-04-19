@@ -9,6 +9,10 @@
 #include "HRZ_ble.h"
 #include "HRZ_ADS1298.h"
 
+#ifndef FIR_FILTER_ENABLED
+#define FIR_FILTER_ENABLED 0
+#endif
+
 #define NRF_LOG_MODULE_NAME "MAIN"
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"

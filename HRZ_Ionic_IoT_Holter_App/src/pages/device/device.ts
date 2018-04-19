@@ -15,7 +15,8 @@ let channel7TimeSeries = new SmoothieChart.TimeSeries();
 let channel8TimeSeries = new SmoothieChart.TimeSeries();
 var time1, time2, time3, time4, time5, time6, time7, time8;
 var millisPerPixelVal = 8;
-var samplePeriod = 4;
+var samplePeriod = 4; //Sample period in ms
+var sampleSize = 4; //Size of each sample in bytes
 
 @Component({
   selector: 'page-device',
@@ -114,9 +115,10 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8171').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel1 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time1 += samplePeriod;
-          channel1TimeSeries.append(time1, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          // channel1TimeSeries.append(time1, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel1TimeSeries.append(time1, data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24));
         }
         this.socket.emit("channel1", this.channel1);
         this.chRef.detectChanges();
@@ -129,7 +131,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8172').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel2 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time2 += samplePeriod;
           channel2TimeSeries.append(time2, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -144,7 +146,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8173').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel3 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time3 += samplePeriod;
           channel3TimeSeries.append(time3, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -159,7 +161,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8174').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel4 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time4 += samplePeriod;
           channel4TimeSeries.append(time4, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -174,7 +176,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8175').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel5 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time5 += samplePeriod;
           channel5TimeSeries.append(time5, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -189,7 +191,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8176').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel6 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time6 += samplePeriod;
           channel6TimeSeries.append(time6, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -204,7 +206,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8177').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel7 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time7 += samplePeriod;
           channel7TimeSeries.append(time7, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }
@@ -219,7 +221,7 @@ export class DevicePage{
       this.ble.startNotification(this.device.id, '805B', '8178').subscribe(result => {
         let data = new Uint8Array(result);
         this.channel8 = this.buf2hex(data);
-        for (var i = 0; i < data.length; i+=3) {
+        for (var i = 0; i < data.length; i+=sampleSize) {
           time8 += samplePeriod;
           channel8TimeSeries.append(time8, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
         }

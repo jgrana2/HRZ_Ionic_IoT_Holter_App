@@ -12,6 +12,7 @@ extern "C" {
 #include "custom_board.h"
 #include "nrf_drv_spi.h"
 #include "nrf_drv_gpiote.h"
+#include "HRZ_ADS1298_LP_Filter.h"
 
 #define ADS1298_SELECT()    nrf_gpio_pin_clear(ADS1298_SPI_SS_PIN)
 #define ADS1298_DESELECT()  nrf_gpio_pin_set(ADS1298_SPI_SS_PIN)
@@ -80,6 +81,7 @@ typedef struct
 static volatile bool spi_xfer_done;                     /**< SPI completed the transfer. */
 static const nrf_drv_spi_t ads1298_spi = NRF_DRV_SPI_INSTANCE(ADS1298_SPI_INSTANCE);  /**< SPI instance. */
 extern bool ads1298_data_ready; /**< Received interrupt from ADS1928 indicating that data is available */
+extern bool ble_packet_ready;
 
 void hrz_ads1298_spi_init();
 void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_context);
@@ -90,7 +92,10 @@ void hrz_ads1298_int_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t
 void hrz_ads1298_init(void);
 void hrz_ads1298_spi_txrx(uint8_t * m_tx_buf, uint8_t m_tx_length, uint8_t m_rx_length);
 void hrz_get_ads1298_data();
-void hrz_send_ecg_channels();
+arm_status hrz_filter_data();
+void hrz_send_data_over_BLE();
+void hrz_send_filtered_data_over_BLE();
+void hrz_send_ecg_channel();
 
 #ifdef __cplusplus
 }
