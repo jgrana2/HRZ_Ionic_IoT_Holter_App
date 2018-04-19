@@ -17,6 +17,7 @@ var time1, time2, time3, time4, time5, time6, time7, time8;
 var millisPerPixelVal = 8;
 var samplePeriod = 4; //Sample period in ms
 var sampleSize = 4; //Size of each sample in bytes
+var nSamplesPerUpload = 120;
 
 @Component({
   selector: 'page-device',
@@ -26,19 +27,27 @@ export class DevicePage{
   device: {id: string};
   characteristics:any[];
   status: string;
-  channel1: string;
-  channel2: string;
-  channel3: string;
-  channel4: string;
-  channel5: string;
-  channel6: string;
-  channel7: string;
-  channel8: string;
+  channel1: any[];
+  channel2: any[];
+  channel3: any[];
+  channel4: any[];
+  channel5: any[];
+  channel6: any[];
+  channel7: any[];
+  channel8: any[];
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private ble: BLE,
     private chRef: ChangeDetectorRef, private socket: Socket){
       this.device = this.navParams.get('device');
       this.characteristics = this.navParams.get('characteristics');
+      this.channel1 = [];
+      this.channel2 = [];
+      this.channel3 = [];
+      this.channel4 = [];
+      this.channel5 = [];
+      this.channel6 = [];
+      this.channel7 = [];
+      this.channel8 = [];
     }
 
     ionViewDidLoad(){
@@ -102,7 +111,6 @@ export class DevicePage{
     readStatus(){
       this.ble.startNotification(this.device.id, '805B', '8170').subscribe(result => {
         let data = new Uint8Array(result);
-        // console.log(this.buf2hex(data));
         this.status = this.buf2hex(data);
         this.chRef.detectChanges();
       },
@@ -114,13 +122,17 @@ export class DevicePage{
     readChannel1(){
       this.ble.startNotification(this.device.id, '805B', '8171').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel1 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time1 += samplePeriod;
-          // channel1TimeSeries.append(time1, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
-          channel1TimeSeries.append(time1, data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24));
+          channel1TimeSeries.append(time1, sampleValue);
+          this.channel1.push(sampleValue);
         }
-        this.socket.emit("channel1", this.channel1);
+        if (this.channel1.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':1,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel1};
+            this.socket.emit("channel1", jsonData);
+            this.channel1 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -130,12 +142,17 @@ export class DevicePage{
     readChannel2(){
       this.ble.startNotification(this.device.id, '805B', '8172').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel2 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time2 += samplePeriod;
-          channel2TimeSeries.append(time2, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel2TimeSeries.append(time2, sampleValue);
+          this.channel2.push(sampleValue);
         }
-        this.socket.emit("channel2", this.channel2);
+        if (this.channel2.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':2,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel2};
+            this.socket.emit("channel2", jsonData);
+            this.channel2 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -145,12 +162,17 @@ export class DevicePage{
     readChannel3(){
       this.ble.startNotification(this.device.id, '805B', '8173').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel3 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time3 += samplePeriod;
-          channel3TimeSeries.append(time3, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel3TimeSeries.append(time3, sampleValue);
+          this.channel3.push(sampleValue);
         }
-        this.socket.emit("channel3", this.channel3);
+        if (this.channel3.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':3,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel3};
+            this.socket.emit("channel3", jsonData);
+            this.channel3 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -160,12 +182,17 @@ export class DevicePage{
     readChannel4(){
       this.ble.startNotification(this.device.id, '805B', '8174').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel4 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time4 += samplePeriod;
-          channel4TimeSeries.append(time4, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel4TimeSeries.append(time4, sampleValue);
+          this.channel4.push(sampleValue);
         }
-        this.socket.emit("channel4", this.channel4);
+        if (this.channel4.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':4,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel4};
+            this.socket.emit("channel4", jsonData);
+            this.channel4 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -175,12 +202,17 @@ export class DevicePage{
     readChannel5(){
       this.ble.startNotification(this.device.id, '805B', '8175').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel5 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time5 += samplePeriod;
-          channel5TimeSeries.append(time5, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel5TimeSeries.append(time5, sampleValue);
+          this.channel5.push(sampleValue);
         }
-        this.socket.emit("channel5", this.channel5);
+        if (this.channel5.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':5,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel5};
+            this.socket.emit("channel5", jsonData);
+            this.channel5 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -190,12 +222,17 @@ export class DevicePage{
     readChannel6(){
       this.ble.startNotification(this.device.id, '805B', '8176').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel6 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time6 += samplePeriod;
-          channel6TimeSeries.append(time6, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel6TimeSeries.append(time6, sampleValue);
+          this.channel6.push(sampleValue);
         }
-        this.socket.emit("channel6", this.channel6);
+        if (this.channel6.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':6,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel6};
+            this.socket.emit("channel6", jsonData);
+            this.channel6 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -205,12 +242,17 @@ export class DevicePage{
     readChannel7(){
       this.ble.startNotification(this.device.id, '805B', '8177').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel7 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time7 += samplePeriod;
-          channel7TimeSeries.append(time7, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel7TimeSeries.append(time7, sampleValue);
+          this.channel7.push(sampleValue);
         }
-        this.socket.emit("channel7", this.channel7);
+        if (this.channel7.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':7,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel7};
+            this.socket.emit("channel7", jsonData);
+            this.channel7 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
@@ -220,12 +262,17 @@ export class DevicePage{
     readChannel8(){
       this.ble.startNotification(this.device.id, '805B', '8178').subscribe(result => {
         let data = new Uint8Array(result);
-        this.channel8 = this.buf2hex(data);
         for (var i = 0; i < data.length; i+=sampleSize) {
+          let sampleValue = data[i+3] + (data[i+2] << 8) + (data[i+1] << 16) + (data[i] << 24);
           time8 += samplePeriod;
-          channel8TimeSeries.append(time8, data[i+2] + (data[i+1] << 8) + (data[i] << 16));
+          channel8TimeSeries.append(time8, sampleValue);
+          this.channel8.push(sampleValue);
         }
-        this.socket.emit("channel8", this.channel8);
+        if (this.channel8.length >= nSamplesPerUpload*data.byteLength/4) {
+            let jsonData = {'device_id':'j70Py2JyWo','channel':8,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel8};
+            this.socket.emit("channel8", jsonData);
+            this.channel8 = [];
+        }
         this.chRef.detectChanges();
       },
       err => {
