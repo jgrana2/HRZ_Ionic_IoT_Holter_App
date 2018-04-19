@@ -16,7 +16,7 @@ extern "C" {
 
 #define ADS1298_SELECT()    nrf_gpio_pin_clear(ADS1298_SPI_SS_PIN)
 #define ADS1298_DESELECT()  nrf_gpio_pin_set(ADS1298_SPI_SS_PIN)
-#define ADS1298_SPI_BUFFER_SIZE 27
+#define ADS1298_SPI_BUFFER_SIZE 27  //3 Status bytes + 24 bytes for channels
 
 //ADS1298 SPI Commands, datasheet p61
 #define ADS1298_WAKEUPC  0x02
