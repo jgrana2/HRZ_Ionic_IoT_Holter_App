@@ -60,9 +60,9 @@ int main(void)
     }
 }
 
-// void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
-// {
-//     NRF_LOG_ERROR("Error id: %d\r\n", info);
-//     NRF_LOG_FINAL_FLUSH();
-//     app_error_save_and_stop(id, pc, info);
-// }
+void app_error_fault_handler(uint32_t id, uint32_t pc, uint32_t info)
+{
+    NRF_LOG_FINAL_FLUSH();
+    app_error_print(id, pc, info);
+    app_error_save_and_stop(id, pc, info);
+}

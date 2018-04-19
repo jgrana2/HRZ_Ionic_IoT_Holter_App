@@ -56,9 +56,9 @@ void hrz_ads1298_spi_init(void)
 }
 
 /**
- * @brief ADS1298 SPI event handler.
- * @param event
- */
+* @brief ADS1298 SPI event handler.
+* @param event
+*/
 void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_context)
 {
   spi_xfer_done = true;
@@ -70,9 +70,9 @@ void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_c
 }
 
 /**
- * @brief Function for configuring ADS1298_INT_PIN for input
- * and GPIOTE to give an interrupt on low to high pin change.
- */
+* @brief Function for configuring ADS1298_INT_PIN for input
+* and GPIOTE to give an interrupt on low to high pin change.
+*/
 void hrz_ads1298_int_init(void)
 {
   ret_code_t err_code;
@@ -86,35 +86,35 @@ void hrz_ads1298_int_init(void)
 }
 
 /**
- * @brief Enable external interrupt
- */
+* @brief Enable external interrupt
+*/
 void hrz_enable_ads1298_external_int(void)
 {
   nrf_drv_gpiote_in_event_enable(ADS1298_DRDY, true);
 }
 
 /**
- * @brief Enable external interrupt
- */
+* @brief Enable external interrupt
+*/
 void hrz_disable_ads1298_external_int(void)
 {
   nrf_drv_gpiote_in_event_disable(ADS1298_DRDY);
 }
 
 /**
- * @brief External DRDY interrupt handler
- * @param pin     DRDY pin input
- * @param action  Action polarity
- */
+* @brief External DRDY interrupt handler
+* @param pin     DRDY pin input
+* @param action  Action polarity
+*/
 void hrz_ads1298_int_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t action)
 {
-    // NRF_LOG_INFO("ADS1298 Interrupt Received\r\n");
-    ads1298_data_ready = true;
+  // NRF_LOG_INFO("ADS1298 Interrupt Received\r\n");
+  ads1298_data_ready = true;
 }
 
 /**
- * @brief ADS1298 initialization routine
- */
+* @brief ADS1298 initialization routine
+*/
 void hrz_ads1298_init(void)
 {
   ads1298_config_mode_enabled = true;
@@ -172,11 +172,11 @@ void hrz_ads1298_init(void)
 }
 
 /**
- * @brief ADS1298 SPI transmit receive function
- * @param tx_buf  TX buffer
- * @param tx_len  TX buffer length
- * @param rx_len  RX buffer length
- */
+* @brief ADS1298 SPI transmit receive function
+* @param tx_buf  TX buffer
+* @param tx_len  TX buffer length
+* @param rx_len  RX buffer length
+*/
 void hrz_ads1298_spi_txrx(uint8_t * tx_buf, uint8_t tx_len, uint8_t rx_len)
 {
   // Reset RX buffer and transfer done flag
