@@ -12,7 +12,7 @@ import { BLE } from '@ionic-native/ble';
 
 import { SocketIoModule, SocketIoConfig } from 'ng-socket-io';
 
-const config: SocketIoConfig = { url: 'http://23.106.141.171:3000', options: {} };
+const config: SocketIoConfig = { url: 'http://192.168.88.253:3000', options: {} };
 
 @NgModule({
   declarations: [
