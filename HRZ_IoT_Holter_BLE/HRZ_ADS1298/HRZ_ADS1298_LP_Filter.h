@@ -8,6 +8,7 @@
 extern "C" {
 #endif
 
+#include "nrf.h"
 #include "arm_math.h"
 
 arm_status hrz_ads1298_filter_data(q31_t *inputF32, q31_t *outputF32);
