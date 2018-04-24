@@ -129,7 +129,7 @@ export class DevicePage{
           this.channel1.push(sampleValue);
         }
         if (this.channel1.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':1,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel1};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':1,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel1};
             this.socket.emit("channel1", jsonData);
             this.channel1 = [];
         }
@@ -149,7 +149,7 @@ export class DevicePage{
           this.channel2.push(sampleValue);
         }
         if (this.channel2.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':2,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel2};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':2,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel2};
             this.socket.emit("channel2", jsonData);
             this.channel2 = [];
         }
@@ -169,7 +169,7 @@ export class DevicePage{
           this.channel3.push(sampleValue);
         }
         if (this.channel3.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':3,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel3};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':3,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel3};
             this.socket.emit("channel3", jsonData);
             this.channel3 = [];
         }
@@ -189,7 +189,7 @@ export class DevicePage{
           this.channel4.push(sampleValue);
         }
         if (this.channel4.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':4,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel4};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':4,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel4};
             this.socket.emit("channel4", jsonData);
             this.channel4 = [];
         }
@@ -209,7 +209,7 @@ export class DevicePage{
           this.channel5.push(sampleValue);
         }
         if (this.channel5.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':5,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel5};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':5,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel5};
             this.socket.emit("channel5", jsonData);
             this.channel5 = [];
         }
@@ -229,7 +229,7 @@ export class DevicePage{
           this.channel6.push(sampleValue);
         }
         if (this.channel6.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':6,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel6};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':6,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel6};
             this.socket.emit("channel6", jsonData);
             this.channel6 = [];
         }
@@ -249,7 +249,7 @@ export class DevicePage{
           this.channel7.push(sampleValue);
         }
         if (this.channel7.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':7,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel7};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':7,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel7};
             this.socket.emit("channel7", jsonData);
             this.channel7 = [];
         }
@@ -269,7 +269,7 @@ export class DevicePage{
           this.channel8.push(sampleValue);
         }
         if (this.channel8.length >= nSamplesPerUpload*data.byteLength/4) {
-            let jsonData = {'device_id':'j70Py2JyWo','channel':8,'time_stamp':new Date(),'n_samples':nSamplesPerUpload*data.byteLength/4,'n_bits':32,'filtered':false,'data': this.channel8};
+            let jsonData = {'device_id':'j70Py2JyWo','channel':8,'timestamp':new Date(),'nsamples':nSamplesPerUpload*data.byteLength/4,'nbits':32,'filtered':false,'data': this.channel8};
             this.socket.emit("channel8", jsonData);
             this.channel8 = [];
         }
