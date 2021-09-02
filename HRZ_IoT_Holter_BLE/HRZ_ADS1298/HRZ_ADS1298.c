@@ -64,7 +64,7 @@ void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_c
   spi_xfer_done = true;
   //If connected, notifying and not configuring ADS1298 registers
   if (m_ecgs.conn_handle != BLE_CONN_HANDLE_INVALID && ads1298_config_mode_enabled == false) {
-    ads1298_data = (hrz_ads1298_data_t *) spi_rx_buffer;
+    // ads1298_data = (hrz_ads1298_data_t *) spi_rx_buffer; //ads1298_data is not needed anymore, we're using the spi buffer directly, the packed attributed changed the byte order.
     ads1298_data_received = true;
   }
 }
@@ -155,7 +155,8 @@ void hrz_ads1298_init(void)
 
   //Write to registers from CONFIG1 to CH8SET
   uint8_t command[14] =
-  { 0x41, 0x0B, 0x46, 0x10, 0xCE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //0x05 = test signal, 0x81 = off, 0x00 = normal electrode input
+  //{opcode1, opcode2, CONFIG1, ..., CH8SET}
+  { 0x41, 0x0B, 0x46, 0x10, 0xCE, 0x00, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05 }; //0x05 = test signal, 0x01 = input shorted, 0x81 = off, 0x00 = normal electrode input
   hrz_ads1298_spi_txrx(command, sizeof(command), 0);
 
   //Read registers
@@ -196,6 +197,21 @@ void hrz_ads1298_spi_txrx(uint8_t * tx_buf, uint8_t tx_len, uint8_t rx_len)
 }
 
 /**
+* @brief Function to pack each channel sample
+*/
+q31_t hrz_convert_24bit_twos_complement_to_int(uint8_t *buffer, uint8_t channel){
+  if (channel < 1 || channel > 8)
+  {
+    NRF_LOG_ERROR("Invalid channel number. The channel must be from 1 to 8");
+    return -1;
+  }
+  
+  channel = channel * 3 ; //Start from the fourth byte, the previous three ones are status bytes
+  q31_t result = ((buffer[channel] << 24) | (buffer[channel + 1] << 16) | (buffer[channel + 2] << 8)) >> 8; 
+  return result;
+}
+
+/**
 * @brief Function for receiving and processing data from ADS1298
 */
 void hrz_get_ads1298_data()
@@ -207,14 +223,14 @@ void hrz_get_ads1298_data()
   while (!ads1298_data_received);
 
   //Save each channel in its own buffer;
-  hrz_channel1[sample_count] = ads1298_data->channel1 & 0xFFFFFF;
-  hrz_channel2[sample_count] = ads1298_data->channel2 & 0xFFFFFF;
-  hrz_channel3[sample_count] = ads1298_data->channel3 & 0xFFFFFF;
-  hrz_channel4[sample_count] = ads1298_data->channel4 & 0xFFFFFF;
-  hrz_channel5[sample_count] = ads1298_data->channel5 & 0xFFFFFF;
-  hrz_channel6[sample_count] = ads1298_data->channel6 & 0xFFFFFF;
-  hrz_channel7[sample_count] = ads1298_data->channel7 & 0xFFFFFF;
-  hrz_channel8[sample_count] = ads1298_data->channel8 & 0xFFFFFF;
+  hrz_channel1[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 1);
+  hrz_channel2[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 2);
+  hrz_channel3[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 3);
+  hrz_channel4[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 4);
+  hrz_channel5[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 5);
+  hrz_channel6[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 6);
+  hrz_channel7[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 7);
+  hrz_channel8[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 8);
 
   sample_count++;
 
