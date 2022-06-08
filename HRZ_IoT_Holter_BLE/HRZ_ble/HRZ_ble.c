@@ -349,7 +349,7 @@ void on_ble_evt(ble_evt_t * p_ble_evt)
             NRF_LOG_INFO("Disconnected.\r\n");
             err_code = bsp_indication_set(BSP_INDICATE_IDLE);
             APP_ERROR_CHECK(err_code);
-            hrz_disable_ads1298_external_int();
+            hrz_stop_ads1298();
             break; // BLE_GAP_EVT_DISCONNECTED
 
         case BLE_GAP_EVT_CONNECTED:
@@ -357,7 +357,7 @@ void on_ble_evt(ble_evt_t * p_ble_evt)
             err_code = bsp_indication_set(BSP_INDICATE_CONNECTED);
             APP_ERROR_CHECK(err_code);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
-            hrz_enable_ads1298_external_int();
+            hrz_start_ads1298();
             break; // BLE_GAP_EVT_CONNECTED
 
         case BLE_GATTC_EVT_TIMEOUT:

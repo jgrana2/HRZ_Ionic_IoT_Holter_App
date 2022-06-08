@@ -42,3 +42,4 @@ HRZ_IoT_Holter_BLE/armgcc/
 HRZ_NeuralCloudLink/
 Python/
 MATLAB/
+.vscode/settings.json

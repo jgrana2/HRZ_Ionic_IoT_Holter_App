@@ -16,7 +16,7 @@ static uint8_t spi_tx_buffer[ADS1298_SPI_BUFFER_SIZE];
 static uint8_t spi_rx_buffer[ADS1298_SPI_BUFFER_SIZE];
 bool ads1298_data_ready = false;
 bool ads1298_data_received = false;
-bool ads1298_config_mode_enabled = true;
+bool ads1298_configured = false;
 bool ble_packet_ready = false;
 hrz_ads1298_data_t *ads1298_data;
 
@@ -53,6 +53,7 @@ void hrz_ads1298_spi_init(void)
   APP_ERROR_CHECK(nrf_drv_spi_init(&ads1298_spi, &ads1298_spi_config, hrz_ads1298_spi_event_handler, NULL));
   nrf_gpio_cfg_output(ADS1298_SPI_SS_PIN);
   ADS1298_DESELECT();
+  NRF_LOG_INFO("ADS SPI configured\r\n")
 }
 
 /**
@@ -63,9 +64,11 @@ void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_c
 {
   spi_xfer_done = true;
   //If connected, notifying and not configuring ADS1298 registers
-  if (m_ecgs.conn_handle != BLE_CONN_HANDLE_INVALID && ads1298_config_mode_enabled == false) {
+  if (m_ecgs.conn_handle != BLE_CONN_HANDLE_INVALID && ads1298_configured == true) {
     // ads1298_data = (hrz_ads1298_data_t *) spi_rx_buffer; //ads1298_data is not needed anymore, we're using the spi buffer directly, the packed attributed changed the byte order.
     ads1298_data_received = true;
+    // NRF_LOG_INFO("Receiving\r\n")
+    // NRF_LOG_HEXDUMP_INFO(spi_rx_buffer, ADS1298_SPI_BUFFER_SIZE)
   }
 }
 
@@ -82,23 +85,24 @@ void hrz_ads1298_int_init(void)
 
   err_code = nrf_drv_gpiote_in_init(ADS1298_DRDY, &in_config, hrz_ads1298_int_pin_handler);
   APP_ERROR_CHECK(err_code);
-
-}
-
-/**
-* @brief Enable external interrupt
-*/
-void hrz_enable_ads1298_external_int(void)
-{
   nrf_drv_gpiote_in_event_enable(ADS1298_DRDY, true);
+  NRF_LOG_INFO("Interrupt configured\r\n")
 }
 
 /**
-* @brief Enable external interrupt
+* @brief Start ADS1298
 */
-void hrz_disable_ads1298_external_int(void)
+void hrz_start_ads1298(void)
 {
-  nrf_drv_gpiote_in_event_disable(ADS1298_DRDY);
+  nrf_gpio_pin_set(ADS1298_START);
+}
+
+/**
+* @brief Stop ADS1298
+*/
+void hrz_stop_ads1298(void)
+{
+  nrf_gpio_pin_clear(ADS1298_START);
 }
 
 /**
@@ -117,7 +121,7 @@ void hrz_ads1298_int_pin_handler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t
 */
 void hrz_ads1298_init(void)
 {
-  ads1298_config_mode_enabled = true;
+  NRF_LOG_INFO("Initializing ADS1298...\r\n");
   hrz_ads1298_spi_init();
   hrz_ads1298_int_init();
   nrf_gpio_cfg_output(ADS1298_PWDN);
@@ -167,9 +171,10 @@ void hrz_ads1298_init(void)
   uint8_t rdatac = ADS1298_RDATACC;
   hrz_ads1298_spi_txrx(&rdatac, 1, 0);
 
-  //Start
-  nrf_gpio_pin_set(ADS1298_START);
-  ads1298_config_mode_enabled = false;
+  //Don't start yet
+  hrz_stop_ads1298();
+
+  ads1298_configured = true;
 }
 
 /**
@@ -180,6 +185,7 @@ void hrz_ads1298_init(void)
 */
 void hrz_ads1298_spi_txrx(uint8_t * tx_buf, uint8_t tx_len, uint8_t rx_len)
 {
+  // NRF_LOG_INFO("Start SPI transmission\r\n")
   // Reset RX buffer and transfer done flag
   memset(spi_rx_buffer, 0, ADS1298_SPI_BUFFER_SIZE);
   spi_xfer_done = false;
@@ -194,6 +200,8 @@ void hrz_ads1298_spi_txrx(uint8_t * tx_buf, uint8_t tx_len, uint8_t rx_len)
     __WFE();
   }
   ADS1298_DESELECT();
+  // NRF_LOG_INFO("Sending\r\n")
+  // NRF_LOG_HEXDUMP_INFO(tx_buf, tx_len)
 }
 
 /**
