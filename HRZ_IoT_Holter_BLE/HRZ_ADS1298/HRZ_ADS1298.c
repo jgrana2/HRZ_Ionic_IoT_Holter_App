@@ -29,6 +29,14 @@ static q31_t hrz_channel5[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_channel6[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_channel7[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_channel8[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel1_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel2_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel3_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel4_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel5_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel6_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel7_raw[HRZ_SAMPLES_PER_PACKET];
+static hrz_channel_data_t hrz_channel8_raw[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_filtered_channel1[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_filtered_channel2[HRZ_SAMPLES_PER_PACKET];
 static q31_t hrz_filtered_channel3[HRZ_SAMPLES_PER_PACKET];
@@ -68,7 +76,7 @@ void hrz_ads1298_spi_event_handler(nrf_drv_spi_evt_t const * p_event, void * p_c
     // ads1298_data = (hrz_ads1298_data_t *) spi_rx_buffer; //ads1298_data is not needed anymore, we're using the spi buffer directly, the packed attributed changed the byte order.
     ads1298_data_received = true;
     // NRF_LOG_INFO("Receiving\r\n")
-    // NRF_LOG_HEXDUMP_INFO(spi_rx_buffer, ADS1298_SPI_BUFFER_SIZE)
+    NRF_LOG_HEXDUMP_INFO(spi_rx_buffer, ADS1298_SPI_BUFFER_SIZE);
   }
 }
 
@@ -160,7 +168,7 @@ void hrz_ads1298_init(void)
   //Write to registers from CONFIG1 to CH8SET
   uint8_t command[14] =
   //{opcode1, opcode2, CONFIG1, ..., CH8SET}
-  { 0x41, 0x0B, 0x46, 0x10, 0xCE, 0x00, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05 }; //0x05 = test signal, 0x01 = input shorted, 0x81 = off, 0x00 = normal electrode input
+  { 0x41, 0x0B, 0x46, 0x10, 0xCE, 0x00, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60, 0x60 }; //0x05 = test signal, 0x01 = input shorted, 0x81 = off, 0x00 = normal electrode input, 0x60 = normal input gain 12
   hrz_ads1298_spi_txrx(command, sizeof(command), 0);
 
   nrf_delay_ms(10);
@@ -229,6 +237,20 @@ q31_t hrz_convert_24bit_twos_complement_to_int(uint8_t *buffer, uint8_t channel)
 }
 
 /**
+* @brief Returns the sample per channel 
+*/
+hrz_channel_data_t hrz_get_sample_from_buffer(uint8_t *buffer, uint8_t channel){
+  channel = channel * 3 ;
+  hrz_channel_data_t result;
+  result.b1 = buffer[channel];
+  result.b2 = buffer[channel + 1];
+  result.b3 = buffer[channel + 2];
+  NRF_LOG_HEXDUMP_INFO(buffer, ADS1298_SPI_BUFFER_SIZE);
+  NRF_LOG_HEXDUMP_INFO((uint8_t*)&result, 3);
+  return result;
+}
+
+/**
 * @brief Function for receiving and processing data from ADS1298
 */
 void hrz_get_ads1298_data()
@@ -240,14 +262,14 @@ void hrz_get_ads1298_data()
   while (!ads1298_data_received);
 
   //Save each channel in its own buffer;
-  hrz_channel1[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 1);
-  hrz_channel2[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 2);
-  hrz_channel3[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 3);
-  hrz_channel4[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 4);
-  hrz_channel5[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 5);
-  hrz_channel6[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 6);
-  hrz_channel7[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 7);
-  hrz_channel8[sample_count] = hrz_convert_24bit_twos_complement_to_int(spi_rx_buffer, 8);
+  hrz_channel1_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 1);
+  hrz_channel2_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 2);
+  hrz_channel3_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 3);
+  hrz_channel4_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 4);
+  hrz_channel5_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 5);
+  hrz_channel6_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 6);
+  hrz_channel7_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 7);
+  hrz_channel8_raw[sample_count] = hrz_get_sample_from_buffer(spi_rx_buffer, 8);
 
   sample_count++;
 
@@ -283,14 +305,14 @@ void hrz_send_data_over_BLE()
 {
 
   //Send samples over BLE
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_1_handles, (uint8_t *)hrz_channel1);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_2_handles, (uint8_t *)hrz_channel2);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_3_handles, (uint8_t *)hrz_channel3);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_4_handles, (uint8_t *)hrz_channel4);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_5_handles, (uint8_t *)hrz_channel5);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_6_handles, (uint8_t *)hrz_channel6);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_7_handles, (uint8_t *)hrz_channel7);
-  hrz_send_ecg_channel(m_ecgs.ecg_channel_8_handles, (uint8_t *)hrz_channel8);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_1_handles, (uint8_t *)hrz_channel1_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_2_handles, (uint8_t *)hrz_channel2_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_3_handles, (uint8_t *)hrz_channel3_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_4_handles, (uint8_t *)hrz_channel4_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_5_handles, (uint8_t *)hrz_channel5_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_6_handles, (uint8_t *)hrz_channel6_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_7_handles, (uint8_t *)hrz_channel7_raw);
+  hrz_send_ecg_channel(m_ecgs.ecg_channel_8_handles, (uint8_t *)hrz_channel8_raw);
   ble_packet_ready = false;
 }
 
