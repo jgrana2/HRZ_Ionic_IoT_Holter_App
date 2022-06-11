@@ -163,6 +163,15 @@ void hrz_ads1298_init(void)
   { 0x41, 0x0B, 0x46, 0x10, 0xCE, 0x00, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05, 0x05 }; //0x05 = test signal, 0x01 = input shorted, 0x81 = off, 0x00 = normal electrode input
   hrz_ads1298_spi_txrx(command, sizeof(command), 0);
 
+  nrf_delay_ms(10);
+  // Enable WCT
+  // Write two WCT registers starting from address 0x18
+  // 001 = Channel 1 negative input connected to WCTA amplifier, RA electrode
+  // 000 = Channel 1 positive input connected to WCTB amplifier, LA electrode
+  // 010 = Channel 2 positive input connected to WCTC amplifier, LL electrode
+  uint8_t wct[4] = {(0x40 | 0x18), 0x01, 0x09, 0xC2};
+  hrz_ads1298_spi_txrx(wct, sizeof(wct), 0);
+
   //Read registers
   uint8_t readRegs[2] = { 0x21, 0x0B };
   hrz_ads1298_spi_txrx(readRegs, sizeof(readRegs), 14);
